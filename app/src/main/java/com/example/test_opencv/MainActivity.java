@@ -55,12 +55,19 @@ package com.example.test_opencv;
 //    }
 //}
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.SurfaceView;
 import android.view.WindowManager;
+import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
@@ -90,7 +97,7 @@ public class MainActivity extends Activity implements CvCameraViewListener2 {
             switch (status) {
                 case BaseLoaderCallback.SUCCESS:
                     try {
-                        InputStream is = getResources().openRawResource(R.raw.haarcascade_frontalface_alt);
+                        InputStream is = getResources().openRawResource(R.raw.haarcascade_eye);
 
                         File CascadeDir = getDir("cascade", Context.MODE_PRIVATE);
                         CascadeFile = new File(CascadeDir, "haarcascade_frontalface_alt.xml");
@@ -122,12 +129,43 @@ public class MainActivity extends Activity implements CvCameraViewListener2 {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        if (! hasCameraPermission())
+            requestCameraPermission();
+
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         setContentView(R.layout.activity_main);
         mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.view);
         mOpenCvCameraView.setVisibility(SurfaceView.VISIBLE);
         mOpenCvCameraView.enableFpsMeter();
         mOpenCvCameraView.setCvCameraViewListener(this);
+    }
+
+    protected boolean hasCameraPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+            return checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
+        else
+            return true;
+    }
+
+    protected void requestCameraPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (shouldShowRequestPermissionRationale(Manifest.permission.CAMERA))
+                Toast.makeText(this, "Camera is necessary for the app work properly!", Toast.LENGTH_LONG).show();
+            requestPermissions(new String[] {Manifest.permission.CAMERA}, 1);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == 1) {
+            for (int result : grantResults) {
+                if (result != PackageManager.PERMISSION_GRANTED) {
+                    finish();
+                }
+            }
+        }
     }
 
     @Override
@@ -170,14 +208,14 @@ public class MainActivity extends Activity implements CvCameraViewListener2 {
     private CascadeClassifier faceClassifier;
 
     public Mat onCameraFrame(CvCameraViewFrame inputFrame) {
-        Mat mGray = inputFrame.rgba();
+        Mat mRGBA = inputFrame.rgba();
         MatOfRect mFoundRects = new MatOfRect();
-        faceClassifier.detectMultiScale(mGray, mFoundRects, 1.1, 2);
+        faceClassifier.detectMultiScale(mRGBA, mFoundRects, 1.1, 2);
         Rect[] rects = mFoundRects.toArray();
         for (Rect rect : rects) {
-            Imgproc.rectangle(mGray, rect.tl(), rect.br(), new Scalar(0, 255, 0, 255));
+            Imgproc.rectangle(mRGBA, rect.tl(), rect.br(), new Scalar(0, 255, 0, 255));
         }
-        return mGray;
+        return mRGBA;
 //        double width = inputFrame.rgba().width();
 //        double height = inputFrame.rgba().height();
 //        Mat dst = new Mat();
