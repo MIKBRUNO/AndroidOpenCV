@@ -20,6 +20,19 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+
+    sourceSets {
+        main {
+            java {
+                exclude '**/OLDOpenCVActivity.java'
+            }
+        }
+        androidTest {
+            java {
+                exclude '**/OLDOpenCVActivity.java'
+            }
+        }
+    }
 }
 
 dependencies {

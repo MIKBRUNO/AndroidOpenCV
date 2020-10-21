@@ -88,7 +88,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 
-public class MainActivity extends Activity implements CvCameraViewListener2 {
+public class OLDOpenCVActivity extends Activity implements CvCameraViewListener2 {
     private CameraBridgeViewBase mOpenCvCameraView;
 
     private BaseLoaderCallback LoaderCallBack = new BaseLoaderCallback(this) {
