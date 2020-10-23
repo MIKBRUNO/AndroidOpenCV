@@ -17,9 +17,7 @@ public final class CameraLib {
         try {
             cameraInst = Camera.open(specificCamera);
         }
-        catch (Exception e) {
-
-        }
+        catch (Exception e) { }
         return cameraInst;
     }
 
