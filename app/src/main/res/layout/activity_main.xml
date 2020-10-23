@@ -2,17 +2,4 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorAccent">
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:text="@string/app_name"
-        android:textSize="32sp"
-        android:layout_gravity="center"
-        android:textColor="@android:color/holo_blue_bright">
-
-    </TextView>
-
-</LinearLayout>
+    android:background="@color/colorAccent"/>
