@@ -3,13 +3,19 @@ package com.example.test_opencv;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.hardware.Camera;
+import android.hardware.camera2.CameraAccessException;
+import android.hardware.camera2.CameraDevice;
+import android.hardware.camera2.CameraManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.PersistableBundle;
+import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
 public class CameraActivity extends AppCompatActivity {
@@ -21,6 +27,8 @@ public class CameraActivity extends AppCompatActivity {
         if (!hasCameraPermission()) requestCameraPermission(); // requesting camera permission
 
         setContentView(R.layout.activity_main);
+
+
     }
 
     protected boolean hasCameraPermission() {
@@ -53,10 +61,6 @@ public class CameraActivity extends AppCompatActivity {
                 }
             }
         }
-    }
-
-    protected boolean checkCameraHardware(Context context) {
-        return (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA));
     }
 
 }

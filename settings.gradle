@@ -1,2 +1,3 @@
+include ':camerakit'
 include ':app'
 rootProject.name = "TEST_OPENCV"
