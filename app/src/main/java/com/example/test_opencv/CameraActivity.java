@@ -11,6 +11,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.Toast;
 
@@ -19,39 +20,65 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
-public class CameraActivity extends AppCompatActivity {
+public class CameraActivity extends AppCompatActivity implements Camera.PreviewCallback {
 
     private Camera cameraDevice;
-    private CameraPreview mPreview;
-    private Camera.PreviewCallback previewCallback;
 
-    public void startPreview() {
-        if (CameraLib.checkCameraHardware(this)) {
-            cameraDevice = CameraLib.getCameraInst();
+    @Override
+    public void onPreviewFrame(byte[] data, Camera camera) {
+        
+    }
+
+    private void onCameraPermissionsGranted() {
+        if (CameraLib.checkCameraHardware(this)) cameraDevice = CameraLib.getCameraInst();
+        else {
+            Toast.makeText(this, "There's not camera on your device.", Toast.LENGTH_LONG).show();
+            finish();
         }
+
+        CameraPreview cameraPreview = new CameraPreview(this, cameraDevice);
 
         setContentView(R.layout.activity_main);
 
-        // Create our Preview view and set it as the content of our activity.
-        mPreview = new CameraPreview(this, cameraDevice);
-        FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
-        preview.addView(mPreview);
-        previewCallback = new Camera.PreviewCallback() {
-            @Override
-            public void onPreviewFrame(byte[] bytes, Camera camera) {
-                Log.e("MIKBRUNO", String.valueOf(bytes.length));
-            }
-        };
-        cameraDevice.setPreviewCallback(previewCallback);
+        FrameLayout frameLayoutCameraPreview = findViewById(R.id.camera_preview);
+        frameLayoutCameraPreview.addView(cameraPreview);
+    }
+
+    private void hideSystemUI() {
+        getWindow().getDecorView().setSystemUiVisibility (
+                View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                        | View.SYSTEM_UI_FLAG_FULLSCREEN
+                        | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
     }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (!hasCameraPermission()) requestCameraPermission(); // requesting camera permission
-        else startPreview();
+        hideSystemUI();
 
+        if (!hasCameraPermission()) requestCameraPermission(); // requesting camera permission
+        else onCameraPermissionsGranted();
+
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        cameraDevice.stopPreview();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        hideSystemUI();
+        cameraDevice.startPreview();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        cameraDevice.release();
     }
 
     protected boolean hasCameraPermission() {
@@ -81,11 +108,11 @@ public class CameraActivity extends AppCompatActivity {
             for (int result : grantResults) { // for each permission
                 if (result != PackageManager.PERMISSION_GRANTED) {
                     requestCameraPermission(); // if any permission is not granted app closes
-                    break;
+                    return;
                 }
             }
         }
-        startPreview();
+        onCameraPermissionsGranted();
     }
 
 }

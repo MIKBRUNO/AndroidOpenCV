@@ -29,4 +29,16 @@ public final class CameraLib {
         return c;
     }
 
+    public static Camera getCameraInst(int specCameraId) {
+        Camera c = null;
+        try {
+            c = Camera.open(specCameraId);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return c;
+    }
+
 }
