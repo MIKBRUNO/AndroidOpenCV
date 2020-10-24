@@ -15,12 +15,18 @@ public final class CameraLib {
 
     private CameraLib() {}
 
-    private static CameraManager cameraManager;
+    public static boolean checkCameraHardware(Context context) { return context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA); }
 
-    public static CameraManager getCameraManager(Activity activity) throws CameraAccessException {
-        if (cameraManager == null)
-            cameraManager = (CameraManager) activity.getSystemService(Context.CAMERA_SERVICE);
-        return cameraManager;
+    public static Camera getCameraInst() {
+        Camera c = null;
+        try {
+            c = Camera.open();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return c;
     }
 
 }
