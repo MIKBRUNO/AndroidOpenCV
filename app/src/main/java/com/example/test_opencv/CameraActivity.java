@@ -11,6 +11,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.util.Log;
+import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -20,14 +21,36 @@ import androidx.appcompat.app.AppCompatActivity;
 
 public class CameraActivity extends AppCompatActivity {
 
+    private Camera cameraDevice;
+    private CameraPreview mPreview;
+    private Camera.PreviewCallback previewCallback;
+
+    public void startPreview() {
+        if (CameraLib.checkCameraHardware(this)) {
+            cameraDevice = CameraLib.getCameraInst();
+        }
+
+        setContentView(R.layout.activity_main);
+
+        // Create our Preview view and set it as the content of our activity.
+        mPreview = new CameraPreview(this, cameraDevice);
+        FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
+        preview.addView(mPreview);
+        previewCallback = new Camera.PreviewCallback() {
+            @Override
+            public void onPreviewFrame(byte[] bytes, Camera camera) {
+                Log.e("MIKBRUNO", String.valueOf(bytes.length));
+            }
+        };
+        cameraDevice.setPreviewCallback(previewCallback);
+    }
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         if (!hasCameraPermission()) requestCameraPermission(); // requesting camera permission
-
-        setContentView(R.layout.activity_main);
-
+        else startPreview();
 
     }
 
@@ -58,9 +81,11 @@ public class CameraActivity extends AppCompatActivity {
             for (int result : grantResults) { // for each permission
                 if (result != PackageManager.PERMISSION_GRANTED) {
                     requestCameraPermission(); // if any permission is not granted app closes
+                    break;
                 }
             }
         }
+        startPreview();
     }
 
 }
