@@ -26,7 +26,7 @@ public class CameraActivity extends AppCompatActivity implements Camera.PreviewC
 
     @Override
     public void onPreviewFrame(byte[] data, Camera camera) {
-        
+
     }
 
     private void onCameraPermissionsGranted() {
@@ -42,6 +42,8 @@ public class CameraActivity extends AppCompatActivity implements Camera.PreviewC
 
         FrameLayout frameLayoutCameraPreview = findViewById(R.id.camera_preview);
         frameLayoutCameraPreview.addView(cameraPreview);
+
+        cameraDevice.setPreviewCallback(this);
     }
 
     private void hideSystemUI() {
