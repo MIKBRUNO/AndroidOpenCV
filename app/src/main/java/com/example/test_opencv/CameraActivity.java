@@ -9,6 +9,7 @@ import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CameraManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.HandlerThread;
 import android.os.PersistableBundle;
 import android.util.Log;
 import android.view.View;
@@ -23,6 +24,7 @@ import androidx.appcompat.app.AppCompatActivity;
 public class CameraActivity extends AppCompatActivity implements Camera.PreviewCallback {
 
     private Camera cameraDevice;
+    private HandlerThread handlerThread;
 
     @Override
     public void onPreviewFrame(byte[] data, Camera camera) {
