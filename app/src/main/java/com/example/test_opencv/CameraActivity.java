@@ -9,6 +9,7 @@ import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CameraManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.PersistableBundle;
 import android.util.Log;
@@ -21,14 +22,32 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
-public class CameraActivity extends AppCompatActivity implements Camera.PreviewCallback {
+import com.example.test_opencv.env.ImageUtils;
+
+public abstract class CameraActivity extends AppCompatActivity implements Camera.PreviewCallback {
 
     private Camera cameraDevice;
     private HandlerThread handlerThread;
+    private Handler handler;
+    protected int previewHeight;
+    protected int previewWidth;
+    protected int[] rgbBytes;
+    protected Runnable imgConverter;
 
     @Override
-    public void onPreviewFrame(byte[] data, Camera camera) {
+    public void onPreviewFrame(final byte[] data, Camera camera) {
+        previewHeight = camera.getParameters().getPreviewSize().height;
+        previewWidth = camera.getParameters().getPreviewSize().width;
+        rgbBytes = new int[previewHeight*previewWidth];
 
+        imgConverter = new Runnable() {
+            @Override
+            public void run() {
+                ImageUtils.convertYUV420SPToARGB8888(data, previewWidth, previewHeight, rgbBytes);
+            }
+        };
+
+        processImage();
     }
 
     private void onCameraPermissionsGranted() {
@@ -58,25 +77,40 @@ public class CameraActivity extends AppCompatActivity implements Camera.PreviewC
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        hideSystemUI();
-
         if (!hasCameraPermission()) requestCameraPermission(); // requesting camera permission
         else onCameraPermissionsGranted();
-
     }
 
     @Override
     protected void onPause() {
         super.onPause();
+        handlerThread.quit();
+        try {
+            handlerThread.join();
+            handlerThread = null;
+            handler = null;
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
         cameraDevice.stopPreview();
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
+    protected void onResume() {
+        super.onResume();
         hideSystemUI();
         cameraDevice.startPreview();
+
+        handlerThread = new HandlerThread("imageBgProcess");
+        handlerThread.start();
+        handler = new Handler(handlerThread.getLooper());
+    }
+
+    protected void runInBackground(Runnable runnable) {
+        if (handler != null) {
+            handler.post(runnable);
+        }
     }
 
     @Override
@@ -118,5 +152,7 @@ public class CameraActivity extends AppCompatActivity implements Camera.PreviewC
         }
         onCameraPermissionsGranted();
     }
+
+    protected abstract void processImage();
 
 }
