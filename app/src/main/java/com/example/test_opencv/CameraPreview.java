@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.ViewGroup;
 
 import java.io.IOException;
 
@@ -21,7 +22,6 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         mCamera = camera;
 
         Camera.Parameters params = mCamera.getParameters();
-        params.setPreviewSize(params.getPictureSize().width, params.getPictureSize().height);
         params.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
         mCamera.setParameters(params);
 
@@ -31,6 +31,9 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         mHolder.addCallback(this);
         // deprecated setting, but required on Android versions prior to 3.0
         mHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
+        // setting correct size for preview
+        Camera.Size size = mCamera.getParameters().getPreviewSize();
+        mHolder.setFixedSize(size.width, size.height);
     }
 
     public void surfaceCreated(SurfaceHolder holder) {
