@@ -22,8 +22,6 @@ public class DetectorActivity extends CameraActivity{
                 Log.e("MIKBRUNO", "processImage running");
                 imgConverter.run();
                 Log.e("MIKBRUNO", String.valueOf(rgbBytes[0]));
-
-                
             }
         });
     }
